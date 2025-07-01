@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Mine Bank System Part 2": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

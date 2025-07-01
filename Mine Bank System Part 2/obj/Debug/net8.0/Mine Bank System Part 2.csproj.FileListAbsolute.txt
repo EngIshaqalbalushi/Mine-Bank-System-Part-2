@@ -1,0 +1,14 @@
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\bin\Debug\net8.0\Mine Bank System Part 2.exe
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\bin\Debug\net8.0\Mine Bank System Part 2.deps.json
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\bin\Debug\net8.0\Mine Bank System Part 2.runtimeconfig.json
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\bin\Debug\net8.0\Mine Bank System Part 2.dll
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\bin\Debug\net8.0\Mine Bank System Part 2.pdb
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\obj\Debug\net8.0\Mine Bank System Part 2.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\obj\Debug\net8.0\Mine Bank System Part 2.AssemblyInfoInputs.cache
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\obj\Debug\net8.0\Mine Bank System Part 2.AssemblyInfo.cs
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\obj\Debug\net8.0\Mine Bank System Part 2.csproj.CoreCompileInputs.cache
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\obj\Debug\net8.0\Mine Bank System Part 2.dll
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\obj\Debug\net8.0\refint\Mine Bank System Part 2.dll
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\obj\Debug\net8.0\Mine Bank System Part 2.pdb
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\obj\Debug\net8.0\Mine Bank System Part 2.genruntimeconfig.cache
+C:\Users\Codeline\Desktop\Full stack\day 49\Mine Bank System Part 2\Mine Bank System Part 2\obj\Debug\net8.0\ref\Mine Bank System Part 2.dll
