@@ -1317,7 +1317,7 @@ namespace MineBankSystemPart2
             }
         }
 
-
+        // New currency-related methods
         // New currency-related methods
         public static void ViewCurrencyExchangeReport()
         {
