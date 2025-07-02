@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Mine Bank System Part 2")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f11e3a4512b64615115dc90a7f46c857c0de20ae")]
 [assembly: System.Reflection.AssemblyProductAttribute("Mine Bank System Part 2")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Mine Bank System Part 2")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

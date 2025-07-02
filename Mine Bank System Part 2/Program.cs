@@ -51,7 +51,7 @@ namespace MineBankSystemPart2
         // Account security fields
         public static List<bool> accountLockedStatus = new List<bool>();
         public static List<int> failedLoginAttempts = new List<int>();
-        private const int MAX_LOGIN_ATTEMPTS = 3;
+        public const int MAX_LOGIN_ATTEMPTS = 3;
 
         // Loan related fields
         public static Queue<string> loanRequests = new Queue<string>();
@@ -87,9 +87,9 @@ namespace MineBankSystemPart2
         public static string nationalIDPath = "nationalIDs.txt";
 
         // Add with your other static fields
-        private const string ADMIN_ID = "admin123";
-        private const string ADMIN_PASSWORD = "Secure@123"; // Change to a strong password
-        private static bool isAdminAuthenticated = false;
+        public const string ADMIN_ID = "1234";
+        public const string ADMIN_PASSWORD = "12345"; // Change to a strong password
+        public static bool isAdminAuthenticated = false;
 
         // Base account number (increments for new accounts)
         public static int userCordNumber = 12062000;
@@ -296,7 +296,6 @@ namespace MineBankSystemPart2
         //++++++++++++++++++++++++++++++++ Login +++++++++++++++++++++++++++++++++++++++++
 
 
-        // Login System for Users and admin
 
 
 
@@ -811,10 +810,11 @@ namespace MineBankSystemPart2
 
                     balances[index] -= amount;
                     // Display success message with new balance
-
+               
                     Console.WriteLine($"Withdrew {amount:C2}. New balance: {balances[index]:C2}");
                     AddTransaction(accountNumber, "WITHDRAWAL", amount, balances[index]);
                     CollectFeedback(accountNumber);
+                    Console.ReadKey();
                 }
                 else
                 {
@@ -1032,14 +1032,14 @@ namespace MineBankSystemPart2
                 return;
             }
 
-            Console.Clear();
-            Console.WriteLine("**************************************************************\n");
-            Console.WriteLine("                      ADMINISTRATOR DASHBOARD                  \n");
-            Console.WriteLine("**************************************************************\n");
-
-            bool Flag = true;
-            while (Flag)
+            bool keepRunning = true;
+            while (keepRunning)
             {
+                Console.Clear();
+                Console.WriteLine("**************************************************************");
+                Console.WriteLine("                      ADMINISTRATOR DASHBOARD                ");
+                Console.WriteLine("**************************************************************");
+
                 Console.WriteLine("\nMain Menu Options:");
                 Console.WriteLine(" 1. Account Management");
                 Console.WriteLine(" 2. Transaction Monitoring");
@@ -1051,175 +1051,221 @@ namespace MineBankSystemPart2
                 Console.WriteLine(" 0. Logout");
 
                 Console.Write("\nEnter your choice: ");
-
                 if (!int.TryParse(Console.ReadLine(), out int mainChoice))
                 {
                     Console.WriteLine("Invalid input. Please enter a number.");
-                    Console.WriteLine("\nPress any key to continue...");
                     Console.ReadKey();
-                    Console.Clear();
                     continue;
                 }
 
+                Console.Clear();
                 switch (mainChoice)
                 {
                     case 1: // Account Management
-                        Console.Clear();
                         Console.WriteLine("ACCOUNT MANAGEMENT\n");
                         Console.WriteLine("1. View Pending Account Requests");
                         Console.WriteLine("2. Approve New Accounts");
                         Console.WriteLine("3. View All Accounts");
-                        Console.WriteLine("4. Search Accounts by National ID");
-                        Console.WriteLine("5. Delete Accounts");
+                        Console.WriteLine("4. Search Account by National ID");
+                        Console.WriteLine("5. Delete Account");
+                        Console.WriteLine("6. Transfer Funds Between Accounts");
+                        Console.WriteLine("7. Manage Locked Accounts");
+                        Console.WriteLine("8. Update Account Info");
                         Console.WriteLine("0. Back");
                         Console.Write("\nSelect option: ");
-
-                        int accountChoice = int.Parse(Console.ReadLine());
-                        switch (accountChoice)
+                        if (int.TryParse(Console.ReadLine(), out int accChoice))
                         {
-                            case 1: ViewAccountRequests(); break;
-                            case 2: ProcessNextAccountRequest(); break;
-                            case 3: ViewAllAccounts(); break;
-                            case 4: SearchByNationalID(); break;
-                            case 5: DeleteAccount(); break;
-                            case 0: break;
-                            default: Console.WriteLine("Invalid option"); break;
+                            switch (accChoice)
+                            {
+                                case 1: ViewAccountRequests(); break;
+                                case 2: ProcessNextAccountRequest(); break;
+                                case 3: ViewAllAccounts(); break;
+                                case 4: SearchByNationalID(); break;
+                                case 5: DeleteAccount(); break;
+                                case 6: TransferFunds(); break;
+                                case 7: ManageLockedAccounts(); break;
+                                case 8: UpdateAccountInfo(); break;
+                                case 0: break;
+                                default: Console.WriteLine("Invalid option."); break;
+                            }
                         }
                         break;
 
                     case 2: // Transaction Monitoring
-                        Console.Clear();
                         Console.WriteLine("TRANSACTION MONITORING\n");
-                        Console.WriteLine("1. View User Transaction History");
-                        Console.WriteLine("2. View All Transactions");
-                        Console.WriteLine("3. Filter Transactions");
-                        Console.WriteLine("4. View Suspicious Activity");
-                        Console.WriteLine("5. View Currency Deposits");
+                        Console.WriteLine("1. View Filtered Transactions");
+                        Console.WriteLine("2. View Currency Deposits");
+                        Console.WriteLine("3. Print User Transaction History");
+                     
                         Console.WriteLine("0. Back");
                         Console.Write("\nSelect option: ");
-
-                        int transactionChoice = int.Parse(Console.ReadLine());
-                        switch (transactionChoice)
+                        if (int.TryParse(Console.ReadLine(), out int tChoice))
                         {
-                            case 1: PrintUserTransactions(); break;
-                            case 2: ViewAllTransactions(); break;
-                            case 3: ViewFilteredTransactions(); break;
-                            case 4: ViewSuspiciousActivity(); break;
-                            case 5: ViewCurrencyDeposits(); break;
-                            case 0: break;
-                            default: Console.WriteLine("Invalid option"); break;
+                            switch (tChoice)
+                            {
+                                case 1: ViewFilteredTransactions(); break;
+                                case 2: ViewCurrencyDeposits(); break;
+                                case 3: PrintUserTransactions(); break;
+                                case 0: break;
+                                default: Console.WriteLine("Invalid option."); break;
+                            }
                         }
                         break;
 
                     case 3: // Loan Processing
-                        Console.Clear();
                         Console.WriteLine("LOAN PROCESSING\n");
-                        Console.WriteLine("1. View Pending Loan Applications");
-                        Console.WriteLine("2. Process Loan Requests");
-                        Console.WriteLine("3. View Active Loans");
-                        Console.WriteLine("4. View Defaulted Loans");
+                        Console.WriteLine("1. Process Loan Requests");
+                        Console.WriteLine("2. Check Active Loan Status");
                         Console.WriteLine("0. Back");
                         Console.Write("\nSelect option: ");
-
-                        int loanChoice = int.Parse(Console.ReadLine());
-                        switch (loanChoice)
+                        if (int.TryParse(Console.ReadLine(), out int loanChoice))
                         {
-                            case 1: ViewLoanApplications(); break;
-                            case 2: ProcessLoanRequests(); break;
-                            case 3: ViewActiveLoans(); break;
-                            case 4: ViewDefaultedLoans(); break;
-                            case 0: break;
-                            default: Console.WriteLine("Invalid option"); break;
+                            switch (loanChoice)
+                            {
+                                case 1:
+                                    ProcessLoanRequests();
+                                    break;
+
+                                case 2:
+                                    Console.Write("Enter account number to check loan status: ");
+                                    if (int.TryParse(Console.ReadLine(), out int accountNumber))
+                                    {
+                                        if (HasActiveLoan(accountNumber))
+                                            Console.WriteLine($" Account {accountNumber} has an active loan.");
+                                        else
+                                            Console.WriteLine($" Account {accountNumber} does not have an active loan.");
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Invalid account number input.");
+                                    }
+
+                                    Console.WriteLine("\nPress any key to return...");
+                                    Console.ReadKey();
+                                    break;
+
+                                case 0:
+                                    break;
+
+                                default:
+                                    Console.WriteLine("Invalid option.");
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid input. Please enter a number.");
+                            Console.ReadKey();
                         }
                         break;
 
+
                     case 4: // Appointment Management
-                        Console.Clear();
                         Console.WriteLine("APPOINTMENT MANAGEMENT\n");
                         Console.WriteLine("1. View All Appointments");
-                        Console.WriteLine("2. Cancel Appointments");
-                        Console.WriteLine("3. Reschedule Appointments");
-                        Console.WriteLine("4. View Today's Schedule");
+                        Console.WriteLine("2. Cancel Appointment");
                         Console.WriteLine("0. Back");
                         Console.Write("\nSelect option: ");
-
-                        int appointmentChoice = int.Parse(Console.ReadLine());
-                        switch (appointmentChoice)
+                        if (int.TryParse(Console.ReadLine(), out int aChoice))
                         {
-                            case 1: ViewAllAppointments(); break;
-                            case 2: CancelAppointment(); break;
-                            case 3: RescheduleAppointment(); break;
-                            case 4: ViewTodaysAppointments(); break;
-                            case 0: break;
-                            default: Console.WriteLine("Invalid option"); break;
+                            switch (aChoice)
+                            {
+                                case 1: ViewAllAppointments(); break;
+                                case 2: CancelAppointment(); break;
+                                case 0: break;
+                                default: Console.WriteLine("Invalid option."); break;
+                            }
                         }
                         break;
 
                     case 5: // Customer Feedback
-                        Console.Clear();
                         Console.WriteLine("CUSTOMER FEEDBACK\n");
-                        Console.WriteLine("1. View Feedback Statistics");
-                        Console.WriteLine("2. Read Customer Reviews");
-                        Console.WriteLine("3. View Transaction Ratings");
+                        Console.WriteLine("1. View Feedback Stats");
+                        Console.WriteLine("2. View Reviews");
+                     
+                        Console.WriteLine("3. Collect New Feedback");
                         Console.WriteLine("0. Back");
                         Console.Write("\nSelect option: ");
-
-                        int feedbackChoice = int.Parse(Console.ReadLine());
-                        switch (feedbackChoice)
+                        if (int.TryParse(Console.ReadLine(), out int fChoice))
                         {
-                            case 1: ViewFeedbackStats(); break;
-                            case 2: ViewReviews(); break;
-                            case 3: ViewTransactionRatings(); break;
-                            case 0: break;
-                            default: Console.WriteLine("Invalid option"); break;
+                            switch (fChoice)
+                            {
+                                case 1: ViewFeedbackStats(); break;
+                                case 2: ViewReviews(); break;
+                                case 3:
+                                    Console.Write("Enter account number for feedback submission: ");
+                                    if (int.TryParse(Console.ReadLine(), out int feedbackAccount))
+                                    {
+                                        CollectFeedback(feedbackAccount);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Invalid account number.");
+                                    }
+                                    break;
+                                case 0: break;
+                                default: Console.WriteLine("Invalid option."); break;
+                            }
                         }
                         break;
 
                     case 6: // Financial Reports
-                        Console.Clear();
                         Console.WriteLine("FINANCIAL REPORTS\n");
-                        Console.WriteLine("1. View Bank Balance");
-                        Console.WriteLine("2. View Top Customers");
-                        Console.WriteLine("3. Generate Monthly Report");
-                        Console.WriteLine("4. View Transaction Trends");
-                        Console.WriteLine("5. View Currency Exchange Report");
+                        Console.WriteLine("1. Show Total Bank Balance");
+                        Console.WriteLine("2. Show Top 3 Richest Customers");
+                        Console.WriteLine("3. Generate Monthly Statement");
+                        Console.WriteLine("4. View Currency Exchange Report");
                         Console.WriteLine("0. Back");
                         Console.Write("\nSelect option: ");
-
-                        int reportChoice = int.Parse(Console.ReadLine());
-                        switch (reportChoice)
+                        if (int.TryParse(Console.ReadLine(), out int reportChoice))
                         {
-                            case 1: ShowTotalBankBalance(); break;
-                            case 2: ShowTop3RichestCustomers(); break;
-                            case 3: GenerateMonthlyReport(); break;
-                            case 4: ViewTransactionTrends(); break;
-                            case 5: ViewCurrencyExchangeReport(); break;
-                            case 0: break;
-                            default: Console.WriteLine("Invalid option"); break;
+                            switch (reportChoice)
+                            {
+                                case 1: ShowTotalBankBalance(); break;
+                                case 2: ShowTop3RichestCustomers(); break;
+                                case 3: GenerateMonthlyStatement(); break;
+                                case 4: ViewCurrencyExchangeReport(); break;
+                                case 0: break;
+                                default: Console.WriteLine("Invalid option."); break;
+                            }
                         }
                         break;
 
                     case 7: // System Administration
-                        Console.Clear();
                         Console.WriteLine("SYSTEM ADMINISTRATION\n");
                         Console.WriteLine("1. Create Data Backup");
                         Console.WriteLine("2. Change Admin Password");
-                        Console.WriteLine("3. View System Logs");
-                        Console.WriteLine("4. Manage User Permissions");
-                        Console.WriteLine("5. Update Exchange Rates");
+                        Console.WriteLine("3. Validate a User Password");
+                        Console.WriteLine("4. Hash a Password");
+                        Console.WriteLine("5. Read Masked Password (for testing)");
                         Console.WriteLine("0. Back");
                         Console.Write("\nSelect option: ");
-
-                        int adminChoice = int.Parse(Console.ReadLine());
-                        switch (adminChoice)
+                        if (int.TryParse(Console.ReadLine(), out int sChoice))
                         {
-                            case 1: CreateBackup(); break;
-                            case 2: ChangeAdminPassword(); break;
-                            case 3: ViewSystemLogs(); break;
-                            case 4: ManagePermissions(); break;
-                            case 5: UpdateExchangeRates(); break;
-                            case 0: break;
-                            default: Console.WriteLine("Invalid option"); break;
+                            switch (sChoice)
+                            {
+                                case 1: CreateBackup(); break;
+                                case 2: ChangeAdminPassword(); break;
+                                case 3: // Validate a User Password
+                                    Console.Write("Enter password to validate: ");
+                                    string inputPassword = Console.ReadLine();
+                                    if (ValidatePassword(inputPassword))
+                                        Console.WriteLine(" Password is valid.");
+                                    else
+                                        Console.WriteLine("❌ Password is invalid. Must be 8–20 characters, with at least one digit and one letter.");
+                                    break;
+
+                                case 4: // Hash a Password
+                                    Console.Write("Enter password to hash: ");
+                                    string rawPassword = Console.ReadLine();
+                                    string hashed = HashPassword(rawPassword);
+                                    Console.WriteLine($" Hashed Password:\n{hashed}");
+                                    break;
+
+                                case 5: ReadMaskedPassword(); break;
+                                case 0: break;
+                                default: Console.WriteLine("Invalid option."); break;
+                            }
                         }
                         break;
 
@@ -1228,25 +1274,17 @@ namespace MineBankSystemPart2
                         Console.WriteLine("\nLogged out successfully.");
                         Console.WriteLine("\nPress any key to return to main menu...");
                         Console.ReadKey();
-                        Flag = false;
+                        keepRunning = false;
                         break;
 
                     default:
-                        Console.WriteLine("\nInvalid option. Please try again.");
-                        Console.WriteLine("\nPress any key to continue...");
+                        Console.WriteLine("Invalid main menu option.");
                         Console.ReadKey();
                         break;
                 }
-
-                Console.Clear();
-                if (Flag) // Only show header if staying in admin menu
-                {
-                    Console.WriteLine("**************************************************************\n");
-                    Console.WriteLine("                      ADMINISTRATOR DASHBOARD                  \n");
-                    Console.WriteLine("**************************************************************\n");
-                }
             }
         }
+
 
         // New currency-related methods
         private static void ViewCurrencyExchangeReport()
@@ -2591,7 +2629,7 @@ namespace MineBankSystemPart2
         }
 
         // Check for active loans
-        private static bool HasActiveLoan(int accountNumber)
+        public static bool HasActiveLoan(int accountNumber)
         {
             for (int i = 0; i < loanAccountNumbers.Count; i++)
             {
@@ -3157,10 +3195,12 @@ namespace MineBankSystemPart2
                 {
                     backupData.AppendLine($"{feedbackAccountNumbers[i]}|{feedbackScores[i]}|{feedbackComments[i]}");
                 }
-
+                //ww
                 // Write to backup file
                 File.WriteAllText(backupPath, backupData.ToString());
+
                 Console.WriteLine($"Backup created successfully: {backupFileName}");
+                Console.ReadKey();
             }
             catch (Exception ex)
             {
@@ -3624,7 +3664,6 @@ namespace MineBankSystemPart2
             Console.WriteLine("                  MANAGE LOCKED ACCOUNTS                      ");
             Console.WriteLine("**************************************************************");
 
-            // Using LINQ to find locked accounts
             var lockedAccounts = accountNumbers
                 .Select((num, index) => new { Number = num, Index = index })
                 .Where(x => accountLockedStatus.Count > x.Index && accountLockedStatus[x.Index])
@@ -3642,17 +3681,11 @@ namespace MineBankSystemPart2
             Console.WriteLine("{0,-15} {1,-25} {2,-20}", "Account #", "Customer Name", "Locked Since");
             Console.WriteLine(new string('-', 60));
 
-            // Using LINQ to join with account names
-            var accountDetails = lockedAccounts
-                .Join(accountNames,
-                    locked => locked.Index,
-                    (_, index) => index,
-                    (locked, name) => new { locked.Number, Name = name });
-
-            foreach (var account in accountDetails)
+            foreach (var account in lockedAccounts)
             {
+                string name = accountNames[account.Index];
                 Console.WriteLine("{0,-15} {1,-25} {2,-20}",
-                    account.Number, account.Name, "N/A"); // Add timestamp if tracking
+                    account.Number, name, "N/A"); // Optionally add a lock timestamp later
             }
 
             Console.Write("\nEnter account number to unlock (0 to cancel): ");
@@ -3670,16 +3703,17 @@ namespace MineBankSystemPart2
                 accountLockedStatus[accountToUnlock.Index] = false;
                 failedLoginAttempts[accountToUnlock.Index] = 0;
                 SaveUserData();
-                Console.WriteLine($"\nAccount {accountNumber} unlocked successfully.");
+                Console.WriteLine($"\n✅ Account {accountNumber} unlocked successfully.");
             }
             else
             {
-                Console.WriteLine("\nAccount not found or not locked.");
+                Console.WriteLine("\n❌ Account not found or not locked.");
             }
 
             Console.WriteLine("\nPress any key to return to menu...");
             Console.ReadKey();
         }
+
 
 
         public static void ViewAllTransactions()
