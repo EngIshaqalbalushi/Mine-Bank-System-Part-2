@@ -286,7 +286,7 @@ namespace MineBankSystemPart2
                     Console.WriteLine($"\nInvalid credentials. {remainingAttempts} attempts remaining.");
                 }
             }
-
+              //fuk you 
             Console.WriteLine("\nMaximum attempts reached. Returning to main menu...");
             Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
