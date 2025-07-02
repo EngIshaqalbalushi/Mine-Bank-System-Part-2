@@ -22,11 +22,11 @@ namespace MineBankSystemPart2
 
 
         // Unique account identifiers
-        static List<int> accountNumbers = new List<int>();
+        public static List<int> accountNumbers = new List<int>();
         // Customer full names
-        static List<string> accountNames = new List<string>();
+        public static List<string> accountNames = new List<string>();
         // Current account balances
-        static List<double> balances = new List<double>();
+        public static List<double> balances = new List<double>();
 
         // Links to accountNumbers
 
@@ -49,8 +49,9 @@ namespace MineBankSystemPart2
         public static List<string> addresses = new List<string>();
 
         // Account security fields
-        public static List<bool> accountLockedStatus = new List<bool>();
         public static List<int> failedLoginAttempts = new List<int>();
+        public static List<bool> accountLocked = new List<bool>();
+        public static List<bool> accountLockedStatus = new List<bool>();
         public const int MAX_LOGIN_ATTEMPTS = 3;
 
         // Loan related fields
@@ -64,8 +65,8 @@ namespace MineBankSystemPart2
         public const double DEFAULT_INTEREST_RATE = 5.0; // 5% interest
 
         // Password requirements
-        const int MIN_PASSWORD_LENGTH = 8;
-        const int MAX_PASSWORD_LENGTH = 20;
+        public const int MIN_PASSWORD_LENGTH = 8;
+        public const int MAX_PASSWORD_LENGTH = 20;
 
         // Change these declarations:
         public static string userDataPath = "UserAccounts.txt";
@@ -195,8 +196,9 @@ namespace MineBankSystemPart2
             }
         }
 
-        private static void UserLogin()
+        public static void UserLogin()
         {
+            //mk
             Console.Clear();
             Console.WriteLine("**************************************************************\n");
             Console.WriteLine("                      USER LOGIN PAGE                         \n ");
@@ -231,26 +233,53 @@ namespace MineBankSystemPart2
                 return;
             }
 
-            // Password verification
-            int accountIndex = accountNumbers.IndexOf(accountNumber);
-            Console.Write("Enter Password: ");
-            string password = ReadMaskedPassword();
-            string hashedPassword = HashPassword(password);
+            int index = accountNumbers.IndexOf(accountNumber);
 
-            if (accountPasswords[accountIndex] == hashedPassword)
+            // Check if account is locked
+            if (accountLocked[index])
             {
-                Console.WriteLine("\nLogin successful!");
-                Console.WriteLine("\nPress any key to continue to user menu...");
-                Console.ReadKey();
-                UserIU();
-            }
-            else
-            {
-                Console.WriteLine("\nInvalid password. Access denied.");
+                Console.WriteLine("\n⚠️  This account is locked due to multiple failed login attempts.");
+                Console.WriteLine("Please contact admin to unlock your account.");
                 Console.WriteLine("\nPress any key to return to main menu...");
                 Console.ReadKey();
+                return;
             }
+
+            // Password attempts loop
+            for (int attempt = 1; attempt <= 3; attempt++)
+            {
+                Console.Write("Enter Password: ");
+                string password = ReadMaskedPassword();
+                string hashedPassword = HashPassword(password);
+
+                if (accountPasswords[index] == hashedPassword)
+                {
+                    Console.WriteLine("\n Login successful!");
+                    failedLoginAttempts[index] = 0; // Reset attempts
+                    Console.WriteLine("\nPress any key to continue to user menu...");
+                    Console.ReadKey();
+                    UserIU();
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine($"\n Invalid password. Attempt {attempt}/3");
+                    failedLoginAttempts[index]++;
+                }
+
+                if (failedLoginAttempts[index] >= 3)
+                {
+                    accountLocked[index] = true;
+                    Console.WriteLine("\n Account locked due to 3 failed attempts.");
+                    Console.WriteLine("Please contact admin to unlock.");
+                    break;
+                }
+            }
+
+            Console.WriteLine("\nPress any key to return to main menu...");
+            Console.ReadKey();
         }
+
 
         public static void AdminLogin()
         {
@@ -443,7 +472,7 @@ namespace MineBankSystemPart2
         }
 
         // Helper method to get current user's account number
-        private static int GetCurrentAccountNumber()
+        public static int GetCurrentAccountNumber()
         {
             // Implementation depends on how you track logged-in users
             // This is just a placeholder - adapt to your actual authentication system
@@ -452,7 +481,7 @@ namespace MineBankSystemPart2
         }
 
         // Method to view user's active loans
-        private static void ViewUserLoans()
+        public static void ViewUserLoans()
         {
             Console.Write("Enter your account number: ");
             int accountNumber = int.Parse(Console.ReadLine());
@@ -565,6 +594,9 @@ namespace MineBankSystemPart2
             Console.WriteLine("Your account request has been submitted for admin approval.");
             SaveAccountRequest();
             SavePasswords();
+            failedLoginAttempts.Add(0);
+            accountLocked.Add(false);
+
         }
 
 
@@ -752,7 +784,7 @@ namespace MineBankSystemPart2
             SaveCurrencyTransaction(accountNumber, type, foreignAmount, currency, localAmount);
         }
 
-        private static void SaveCurrencyTransaction(int accountNumber, string type,
+        public static void SaveCurrencyTransaction(int accountNumber, string type,
             double foreignAmount, string currency, double localAmount)
         {
             string currencyTransactionsFile = "currency_transactions.txt";
@@ -1235,9 +1267,9 @@ namespace MineBankSystemPart2
                         Console.WriteLine("SYSTEM ADMINISTRATION\n");
                         Console.WriteLine("1. Create Data Backup");
                         Console.WriteLine("2. Change Admin Password");
-                        Console.WriteLine("3. Validate a User Password");
-                        Console.WriteLine("4. Hash a Password");
-                        Console.WriteLine("5. Read Masked Password (for testing)");
+                       // Console.WriteLine("3. Validate a User Password");
+                       // Console.WriteLine("4. Hash a Password");
+                       // Console.WriteLine("5. Read Masked Password (for testing)");
                         Console.WriteLine("0. Back");
                         Console.Write("\nSelect option: ");
                         if (int.TryParse(Console.ReadLine(), out int sChoice))
@@ -1246,23 +1278,23 @@ namespace MineBankSystemPart2
                             {
                                 case 1: CreateBackup(); break;
                                 case 2: ChangeAdminPassword(); break;
-                                case 3: // Validate a User Password
+                               // case 3: // Validate a User Password
                                     Console.Write("Enter password to validate: ");
                                     string inputPassword = Console.ReadLine();
                                     if (ValidatePassword(inputPassword))
                                         Console.WriteLine(" Password is valid.");
                                     else
-                                        Console.WriteLine("❌ Password is invalid. Must be 8–20 characters, with at least one digit and one letter.");
+                                        Console.WriteLine("Password is invalid. Must be 8–20 characters, with at least one digit and one letter.");
                                     break;
 
-                                case 4: // Hash a Password
+                                //case 4: // Hash a Password
                                     Console.Write("Enter password to hash: ");
                                     string rawPassword = Console.ReadLine();
                                     string hashed = HashPassword(rawPassword);
                                     Console.WriteLine($" Hashed Password:\n{hashed}");
                                     break;
 
-                                case 5: ReadMaskedPassword(); break;
+                                //case 5: ReadMaskedPassword(); break;
                                 case 0: break;
                                 default: Console.WriteLine("Invalid option."); break;
                             }
@@ -1287,7 +1319,7 @@ namespace MineBankSystemPart2
 
 
         // New currency-related methods
-        private static void ViewCurrencyExchangeReport()
+        public static void ViewCurrencyExchangeReport()
         {
             Console.Clear();
             Console.WriteLine("**************************************************************");
@@ -1349,7 +1381,7 @@ namespace MineBankSystemPart2
             Console.ReadKey();
         }
 
-        private static void UpdateExchangeRates()
+        public static void UpdateExchangeRates()
         {
             Console.Clear();
             Console.WriteLine("**************************************************************");
@@ -1427,7 +1459,7 @@ namespace MineBankSystemPart2
             Console.ReadKey();
         }
 
-        private static void CancelAppointment()
+        public static void CancelAppointment()
         {
             Console.Clear();
             Console.WriteLine("CANCEL APPOINTMENT\n");
@@ -2000,7 +2032,7 @@ namespace MineBankSystemPart2
 
 
         // Load Reviews from the file
-        static void LoadReviews()
+        public static void LoadReviews()
         {
             try
             {
@@ -2192,7 +2224,7 @@ namespace MineBankSystemPart2
         }
 
         // Save transactions to file
-        private static void SaveTransactions()
+        public static void SaveTransactions()
         {
             try
             {
@@ -3056,7 +3088,7 @@ namespace MineBankSystemPart2
             Console.ReadKey();
         }
 
-        private static void SaveFeedback()
+        public static void SaveFeedback()
         {
             try
             {
@@ -3153,62 +3185,69 @@ namespace MineBankSystemPart2
         {
             try
             {
-                // Create backup directory if it doesn't exist
+                Console.Write("Would you like to save a backup of all data? (y/n): ");
+                string input = Console.ReadLine().ToLower();
+                if (input != "y") return;
+
                 string backupDir = Path.Combine(Directory.GetCurrentDirectory(), "Backups");
                 if (!Directory.Exists(backupDir))
-                {
                     Directory.CreateDirectory(backupDir);
-                }
 
-                // Generate timestamp for filename
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HHmm");
                 string backupFileName = $"Backup_{timestamp}.txt";
                 string backupPath = Path.Combine(backupDir, backupFileName);
 
-                // Collect all data to backup
                 StringBuilder backupData = new StringBuilder();
+                backupData.AppendLine("==== Mini Bank System Backup ====");
+                backupData.AppendLine($"Backup Date: {DateTime.Now}\n");
 
-                // User accounts
+                // --- USER ACCOUNTS ---
                 backupData.AppendLine("[USER ACCOUNTS]");
-                for (int i = 0; i < accountNumbers.Count; i++)
+                int accountCount = new[] { accountNumbers.Count, accountNames.Count, balances.Count, phoneNumbers.Count, addresses.Count }.Min();
+                for (int i = 0; i < accountCount; i++)
                 {
                     backupData.AppendLine($"{accountNumbers[i]}|{accountNames[i]}|{balances[i]}|{phoneNumbers[i]}|{addresses[i]}");
                 }
 
-                // Transactions
+                // --- TRANSACTIONS ---
                 backupData.AppendLine("\n[TRANSACTIONS]");
-                for (int i = 0; i < transactionAccountNumbers.Count; i++)
+                int transactionCount = new[] { transactionAccountNumbers.Count, transactionTimestamps.Count, transactionTypes.Count, transactionAmounts.Count, transactionBalances.Count }.Min();
+                for (int i = 0; i < transactionCount; i++)
                 {
                     backupData.AppendLine($"{transactionAccountNumbers[i]}|{transactionTimestamps[i]}|{transactionTypes[i]}|{transactionAmounts[i]}|{transactionBalances[i]}");
                 }
 
-                // Loan data
+                // --- LOANS ---
                 backupData.AppendLine("\n[LOANS]");
-                for (int i = 0; i < loanAccountNumbers.Count; i++)
+                int loanCount = new[] { loanAccountNumbers.Count, loanAmounts.Count, interestRates.Count, loanApprovedStatus.Count }.Min();
+                for (int i = 0; i < loanCount; i++)
                 {
                     backupData.AppendLine($"{loanAccountNumbers[i]}|{loanAmounts[i]}|{interestRates[i]}|{loanApprovedStatus[i]}");
                 }
 
-                // Feedback
+                // --- FEEDBACK ---
                 backupData.AppendLine("\n[FEEDBACK]");
-                for (int i = 0; i < feedbackScores.Count; i++)
+                int feedbackCount = new[] { feedbackAccountNumbers.Count, feedbackScores.Count, feedbackComments.Count }.Min();
+                for (int i = 0; i < feedbackCount; i++)
                 {
                     backupData.AppendLine($"{feedbackAccountNumbers[i]}|{feedbackScores[i]}|{feedbackComments[i]}");
                 }
-                //ww
-                // Write to backup file
+
+                // Write file
                 File.WriteAllText(backupPath, backupData.ToString());
 
-                Console.WriteLine($"Backup created successfully: {backupFileName}");
+                Console.WriteLine($"\n Backup successfully created: {backupFileName}");
+                Console.WriteLine("Press any key to return...");
                 Console.ReadKey();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating backup: {ex.Message}");
+                Console.WriteLine($"\n Error creating backup: {ex.Message}");
             }
         }
 
-        //##############################################   . Print All Transactions of a User  #####################################################
+
+        //##############################################   Print All Transactions of a User  #####################################################
         public static void PrintUserTransactions()
         {
             Console.Clear();
@@ -3300,7 +3339,7 @@ namespace MineBankSystemPart2
             Console.ReadKey();
         }
 
-        private static string GetTransactionDescription(string transactionType)
+        public static string GetTransactionDescription(string transactionType)
         {
             switch (transactionType.ToUpper())
             {
@@ -3474,7 +3513,7 @@ namespace MineBankSystemPart2
             Console.ReadKey();
         }
 
-        private static void SaveAppointments()
+        public static void SaveAppointments()
         {
             try
             {
@@ -3486,7 +3525,7 @@ namespace MineBankSystemPart2
             }
         }
 
-        private static void LoadAppointments()
+        public static void LoadAppointments()
         {
             try
             {
@@ -3772,7 +3811,7 @@ namespace MineBankSystemPart2
 
 
 
-
+        
     }
 }
 

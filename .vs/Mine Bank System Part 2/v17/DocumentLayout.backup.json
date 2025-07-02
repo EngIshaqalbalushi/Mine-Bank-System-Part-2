@@ -14,21 +14,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Codeline\\Desktop\\Full stack\\day 49\\Mine Bank System Part 2\\Mine Bank System Part 2\\Program.cs",
               "RelativeDocumentMoniker": "Mine Bank System Part 2\\Program.cs",
-              "ToolTip": "C:\\Users\\Codeline\\Desktop\\Full stack\\day 49\\Mine Bank System Part 2\\Mine Bank System Part 2\\Program.cs*",
-              "RelativeToolTip": "Mine Bank System Part 2\\Program.cs*",
-              "ViewState": "AgIAAGoMAAAAAAAAAAAmwIIMAAAiAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\Codeline\\Desktop\\Full stack\\day 49\\Mine Bank System Part 2\\Mine Bank System Part 2\\Program.cs",
+              "RelativeToolTip": "Mine Bank System Part 2\\Program.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAQwCMAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-01T09:50:21.28Z",
               "EditorCaption": ""

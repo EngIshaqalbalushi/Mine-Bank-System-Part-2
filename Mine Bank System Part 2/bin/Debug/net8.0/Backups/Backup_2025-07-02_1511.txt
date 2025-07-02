@@ -1,0 +1,10 @@
+==== Mini Bank System Backup ====
+Backup Date: 7/2/2025 3:11:39 PM
+
+[USER ACCOUNTS]
+
+[TRANSACTIONS]
+
+[LOANS]
+
+[FEEDBACK]
