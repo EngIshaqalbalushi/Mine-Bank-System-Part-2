@@ -28,6 +28,34 @@ namespace MineBankSystemPart2
         // Current account balances
         public static List<double> balances = new List<double>();
 
+        public static Queue<string> pendingPasswords = new Queue<string>();
+        public static string pendingPasswordsPath = "pending_passwords.txt";
+        public static void SavePendingPasswords()
+        {
+            try
+            {
+                File.WriteAllLines(pendingPasswordsPath, pendingPasswords);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving pending passwords: {ex.Message}");
+            }
+        }
+        public static void LoadPendingPasswords()
+        {
+            try
+            {
+                if (File.Exists(pendingPasswordsPath))
+                {
+                    pendingPasswords = new Queue<string>(File.ReadAllLines(pendingPasswordsPath));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading pending passwords: {ex.Message}");
+            }
+        }
+
         // Links to accountNumbers
 
         public static List<int> transactionAccountNumbers = new List<int>();
@@ -128,7 +156,8 @@ namespace MineBankSystemPart2
 
             LoadAppointments();
             LoadPasswords();
-
+            LoadPendingPasswords();
+            LoadLoans();
 
             // display home page in main funaction
             HomePage();
@@ -198,85 +227,157 @@ namespace MineBankSystemPart2
 
         public static void UserLogin()
         {
-            //mk
-            Console.Clear();
-            Console.WriteLine("**************************************************************\n");
-            Console.WriteLine("                      USER LOGIN PAGE                         \n ");
-            Console.WriteLine("**************************************************************\n");
+            try
+            {
+                Console.Clear();
+                DisplayLoginHeader();
 
+                // Get and validate account number
+                int? accountNumber = GetAccountNumber();
+                if (!accountNumber.HasValue) return;
+
+                // Check account existence and handle new account creation
+                int? accountIndex = VerifyAccountExistence(accountNumber.Value);
+                if (!accountIndex.HasValue) return;
+
+                // Check if account is locked
+                if (IsAccountLocked(accountIndex.Value))
+                {
+                    DisplayLockedAccountMessage();
+                    return;
+                }
+
+                // Handle authentication
+                AuthenticateUser(accountIndex.Value);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nAn unexpected error occurred: {ex.Message}");
+                PauseAndContinue();
+            }
+        }
+
+        private static void DisplayLoginHeader()
+        {
+            Console.WriteLine("**************************************************************");
+            Console.WriteLine("                      USER LOGIN PAGE                         ");
+            Console.WriteLine("**************************************************************\n");
+        }
+
+        private static int? GetAccountNumber()
+        {
             Console.Write("Enter Account Number: ");
-            if (!int.TryParse(Console.ReadLine(), out int accountNumber))
+            string input = Console.ReadLine();
+
+            if (!int.TryParse(input, out int accountNumber))
             {
-                Console.WriteLine("Invalid account number format.");
-                Console.WriteLine("\nPress any key to return to main menu...");
-                Console.ReadKey();
-                return;
+                Console.WriteLine("\nInvalid account number format. Only numbers are allowed.");
+                PauseAndContinue();
+                return null;
             }
 
-            // Check if account exists
-            if (!accountNumbers.Contains(accountNumber))
-            {
-                Console.WriteLine("\nAccount not found.");
-                Console.Write("Would you like to create a new account? (Y/N): ");
-                string response = Console.ReadLine()?.ToUpper();
+            return accountNumber;
+        }
 
-                if (response == "Y")
-                {
-                    requestCreateAccounts();
-                }
-                else
-                {
-                    Console.WriteLine("\nReturning to main menu...");
-                    Console.WriteLine("\nPress any key to continue...");
-                    Console.ReadKey();
-                }
-                return;
+        private static int? VerifyAccountExistence(int accountNumber)
+        {
+            if (accountNumbers.Contains(accountNumber))
+            {
+                return accountNumbers.IndexOf(accountNumber);
             }
 
-            int index = accountNumbers.IndexOf(accountNumber);
+            Console.WriteLine("\nAccount not found.");
+            Console.Write("Would you like to create a new account? (Y/N): ");
+            string response = Console.ReadLine()?.Trim().ToUpper();
 
-            // Check if account is locked
-            if (accountLocked[index])
+            if (response == "Y")
             {
-                Console.WriteLine("\n⚠️  This account is locked due to multiple failed login attempts.");
-                Console.WriteLine("Please contact admin to unlock your account.");
-                Console.WriteLine("\nPress any key to return to main menu...");
-                Console.ReadKey();
-                return;
+                requestCreateAccounts();
+            }
+            else
+            {
+                Console.WriteLine("\nReturning to main menu...");
+                PauseAndContinue();
             }
 
-            // Password attempts loop
+            return null;
+        }
+
+        private static bool IsAccountLocked(int accountIndex)
+        {
+            return accountIndex < accountLocked.Count && accountLocked[accountIndex];
+        }
+
+        private static void DisplayLockedAccountMessage()
+        {
+            Console.WriteLine("\nThis account is locked due to multiple failed login attempts.");
+            Console.WriteLine("Please contact admin to unlock your account.");
+            PauseAndContinue();
+        }
+
+        private static void AuthenticateUser(int accountIndex)
+        {
             for (int attempt = 1; attempt <= 3; attempt++)
             {
                 Console.Write("Enter Password: ");
                 string password = ReadMaskedPassword();
                 string hashedPassword = HashPassword(password);
 
-                if (accountPasswords[index] == hashedPassword)
+                if (IsPasswordCorrect(accountIndex, hashedPassword))
                 {
-                    Console.WriteLine("\n Login successful!");
-                    failedLoginAttempts[index] = 0; // Reset attempts
-                    Console.WriteLine("\nPress any key to continue to user menu...");
-                    Console.ReadKey();
-                    UserIU();
+                    HandleSuccessfulLogin(accountIndex);
                     return;
                 }
-                else
-                {
-                    Console.WriteLine($"\n Invalid password. Attempt {attempt}/3");
-                    failedLoginAttempts[index]++;
-                }
 
-                if (failedLoginAttempts[index] >= 3)
-                {
-                    accountLocked[index] = true;
-                    Console.WriteLine("\n Account locked due to 3 failed attempts.");
-                    Console.WriteLine("Please contact admin to unlock.");
-                    break;
-                }
+                HandleFailedAttempt(accountIndex, attempt);
             }
 
             Console.WriteLine("\nPress any key to return to main menu...");
+            Console.ReadKey();
+        }
+
+        private static bool IsPasswordCorrect(int accountIndex, string hashedPassword)
+        {
+            return accountIndex < accountPasswords.Count &&
+                   accountPasswords[accountIndex] == hashedPassword;
+        }
+
+        private static void HandleSuccessfulLogin(int accountIndex)
+        {
+            Console.WriteLine("\nLogin successful!");
+
+            // Reset failed attempts
+            if (accountIndex < failedLoginAttempts.Count)
+            {
+                failedLoginAttempts[accountIndex] = 0;
+            }
+
+            PauseAndContinue();
+            UserIU();
+        }
+
+        private static void HandleFailedAttempt(int accountIndex, int attempt)
+        {
+            Console.WriteLine($"\nInvalid password. Attempt {attempt}/3");
+
+            // Update failed attempts counter
+            if (accountIndex < failedLoginAttempts.Count)
+            {
+                failedLoginAttempts[accountIndex]++;
+            }
+
+            // Lock account if max attempts reached
+            if (attempt >= 3 && accountIndex < accountLocked.Count)
+            {
+                accountLocked[accountIndex] = true;
+                Console.WriteLine("\nAccount locked due to 3 failed attempts.");
+                Console.WriteLine("Please contact admin to unlock.");
+            }
+        }
+
+        private static void PauseAndContinue()
+        {
+            Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
         }
 
@@ -515,89 +616,142 @@ namespace MineBankSystemPart2
 
         public static void requestCreateAccounts()
         {
-            Console.Clear();
-            Console.WriteLine("**************************************************************\n");
-            Console.WriteLine("                  Request Create Account Page                 \n ");
-            Console.WriteLine("**************************************************************\n");
-
-            Console.Write("Enter Name: ");
-            string name = Console.ReadLine();
-
-            if (string.IsNullOrEmpty(name))
+            try
             {
-                Console.WriteLine("Name cannot be empty");
-                return;
+                Console.Clear();
+                DisplayAccountCreationHeader();
+
+                // Collect user information with validation
+                string name = GetValidName();
+                if (string.IsNullOrEmpty(name)) return;
+
+                string nationalID = GetValidNationalID();
+                if (string.IsNullOrEmpty(nationalID)) return;
+
+                string password = GetValidPassword();
+                if (string.IsNullOrEmpty(password)) return;
+
+             
+
+                string phone = GetPhoneNumber();
+                string address = GetAddress();
+
+                // Create and store account request
+                CreateAccountRequest(name, nationalID, phone, address, password);
+
+                Console.WriteLine("\nYour account request has been submitted for admin approval.");
+                PauseAndContinue();
             }
-
-            Console.Write("Enter National ID: ");
-            string nationalID;
-            do
+            catch (Exception ex)
             {
-                nationalID = Console.ReadLine();
+                Console.WriteLine($"\nAn error occurred during account creation: {ex.Message}");
+                PauseAndContinue();
+            }
+        }
+
+        private static void DisplayAccountCreationHeader()
+        {
+            Console.WriteLine("**************************************************************");
+            Console.WriteLine("                  REQUEST CREATE ACCOUNT PAGE                 ");
+            Console.WriteLine("**************************************************************\n");
+        }
+
+        private static string GetValidName()
+        {
+            while (true)
+            {
+                Console.Write("Enter Name: ");
+                string name = Console.ReadLine()?.Trim();
+
+                if (!string.IsNullOrEmpty(name))
+                {
+                    return name;
+                }
+
+                Console.WriteLine("Name cannot be empty. Please try again.");
+            }
+        }
+
+        private static string GetValidNationalID()
+        {
+            while (true)
+            {
+                Console.Write("Enter National ID: ");
+                string nationalID = Console.ReadLine()?.Trim();
+
                 if (string.IsNullOrEmpty(nationalID))
                 {
-                    Console.WriteLine("National ID cannot be empty. Please enter again:");
+                    Console.WriteLine("National ID cannot be empty. Please try again.");
+                    continue;
                 }
-                else if (IsDuplicateNationalID(nationalID))
-                {
-                    Console.WriteLine("This National ID is already registered. Please enter a different one:");
-                    nationalID = string.Empty;
-                }
-            } while (string.IsNullOrEmpty(nationalID));
 
-            // Password setup
-            string password;
-            bool validPassword;
-            do
+                if (IsDuplicateNationalID(nationalID))
+                {
+                    Console.WriteLine("This National ID is already registered. Please use a different one.");
+                    continue;
+                }
+
+                return nationalID;
+            }
+        }
+
+        private static string GetValidPassword()
+        {
+            while (true)
             {
                 Console.Write("Enter password (8-20 chars, at least 1 letter and 1 number): ");
-                password = ReadMaskedPassword();
+                string password = ReadMaskedPassword();
 
-                validPassword = ValidatePassword(password);
-                if (!validPassword)
+                if (ValidatePassword(password))
                 {
-                    Console.WriteLine("Invalid password. Please try again.");
+                    return password;
                 }
-            } while (!validPassword);
 
-            // Confirm password
-            string confirmPassword;
-            do
-            {
-                Console.Write("Confirm password: ");
-                confirmPassword = ReadMaskedPassword();
+                Console.WriteLine("\nInvalid password. Must contain:");
+                Console.WriteLine("- 8-20 characters");
+                Console.WriteLine("- At least 1 letter");
+                Console.WriteLine("- At least 1 number");
+            }
+        }
 
-                if (password != confirmPassword)
-                {
-                    Console.WriteLine("Passwords don't match. Please try again.");
-                }
-            } while (password != confirmPassword);
+   
 
-            // Collect additional info
+        private static string GetPhoneNumber()
+        {
             Console.Write("Enter phone number: ");
-            string phone = Console.ReadLine();
+            return Console.ReadLine()?.Trim();
+        }
 
+        private static string GetAddress()
+        {
             Console.Write("Enter address: ");
-            string address = Console.ReadLine();
+            return Console.ReadLine()?.Trim();
+        }
 
-            // Combine all information (now includes phone and address)
+        private static void CreateAccountRequest(string name, string nationalID, string phone, string address, string password)
+        {
+            // Store account information
             string accountRequest = $"{name}|{nationalID}|{phone}|{address}";
             requestCreateAccountsInfo.Enqueue(accountRequest);
 
-            // Store hashed password separately
+            // Store hashed password
             string hashedPassword = HashPassword(password);
-            accountPasswords.Add(hashedPassword);
+            pendingPasswords.Enqueue(hashedPassword);
 
-            // Save the national ID
+            // Save the national ID to prevent duplicates
             SaveNationalID(nationalID);
 
-            Console.WriteLine("Your account request has been submitted for admin approval.");
-            SaveAccountRequest();
-            SavePasswords();
+            // Initialize security settings
             failedLoginAttempts.Add(0);
             accountLocked.Add(false);
 
+            // Persist data
+            SaveAccountRequest();
+            SavePendingPasswords();
+            SavePasswords();
         }
+
+     
 
 
 
@@ -1635,46 +1789,93 @@ namespace MineBankSystemPart2
 
         public static void ProcessNextAccountRequest()
         {
+            Console.Clear();
+            DisplayProcessingHeader();
+
+            // Check for pending requests
             if (requestCreateAccountsInfo.Count == 0)
             {
                 Console.WriteLine("No pending account requests.");
+                PauseAndContinue();
                 return;
             }
 
+            // Process the next request
             string request = requestCreateAccountsInfo.Dequeue();
-            string[] parts = request.Split('|');
+            string[] requestData = request.Split('|');
 
-            // Now expecting: name|nationalID|phone|address
-            if (parts.Length < 2)
+            // Validate request format
+            if (requestData.Length < 4) // name|nationalID|phone|address
             {
-                Console.WriteLine("Invalid request format.");
+                Console.WriteLine("Invalid request format. Missing required fields.");
+                PauseAndContinue();
                 return;
             }
 
-            string name = parts[0];
-            string nationalID = parts[1];
-            string phone = parts.Length > 2 ? parts[2] : "";
-            string address = parts.Length > 3 ? parts[3] : "";
+            // Extract request data
+            string name = requestData[0];
+            string nationalID = requestData[1];
+            string phone = requestData[2];
+            string address = requestData[3];
 
-            int newAccountNumber = userCordNumber + 1;
-            userCordNumber = newAccountNumber;
+            // Generate new account number
+            int newAccountNumber = GenerateNewAccountNumber();
 
-            accountNumbers.Add(newAccountNumber);
+            // Create the new account
+            CreateAccount(newAccountNumber, name, nationalID, phone, address);
+            if (pendingPasswords.Count > 0)
+            {
+                string approvedPassword = pendingPasswords.Dequeue();
+                SavePendingPasswords();
+                accountPasswords.Add(approvedPassword);
+            }
+            else
+            {
+                accountPasswords.Add(""); // fallback (should never happen ideally)
+            }
+
+
+            // Display success message
+            Console.WriteLine($"\nAccount created successfully!");
+            Console.WriteLine($"Account Holder: {name}");
+            Console.WriteLine($"Account Number: {newAccountNumber}");
+            Console.WriteLine($"Initial Balance: {defaultBalances:C}");
+            Console.WriteLine("**************************************************************");
+
+            // Save updated data
+            SaveUserData();
+            PauseAndContinue();
+        }
+
+        // Helper Methods
+
+        public static void DisplayProcessingHeader()
+        {
+            Console.WriteLine("**************************************************************");
+            Console.WriteLine("               ACCOUNT REQUEST PROCESSING                     ");
+            Console.WriteLine("**************************************************************\n");
+        }
+
+        public static int GenerateNewAccountNumber()
+        {
+            return ++userCordNumber; // Increment and return new account number
+        }
+
+        public static void CreateAccount(int accountNumber, string name, string nationalID, string phone, string address)
+        {
+            // Add to all related collections
+            accountNumbers.Add(accountNumber);
             accountNames.Add($"{name}|{nationalID}");
             phoneNumbers.Add(phone);
             addresses.Add(address);
             balances.Add(defaultBalances);
 
-            Console.WriteLine($"Account created for {name} with Account Number: {newAccountNumber}");
-            Console.WriteLine($"Default balance of {defaultBalances} added.");
-
-            SaveUserData();
-
-            Console.WriteLine("**************************************************************\n");
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
-            Console.Clear();
+            // Initialize security fields
+            failedLoginAttempts.Add(0);
+            accountLocked.Add(false);
         }
+
+    
 
 
         //############################################## Search By nationa ID #####################################################
